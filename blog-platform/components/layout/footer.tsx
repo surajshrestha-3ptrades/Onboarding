@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center">
           <p className="text-gray-600">
-            © 2024 BlogPlatform. All rights reserved.
+            © 2026 Nishan Poudel. All rights reserved.
           </p>
           <div className="flex gap-4">
             <a href="#" className="text-gray-600 hover:text-gray-900">
