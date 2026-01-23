@@ -1,14 +1,139 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  bio           String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  
+  @@map("users")
+}
+
+model Post {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  content       String    @db.Text
+  excerpt       String?   @db.Text
+  coverImage    String?
+  published     Boolean   @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Foreign Keys
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  tags          PostTag[]
+  comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  
+  // Indexes
+  @@index([slug])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@map("posts")
+}
+
+model Tag {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  slug          String    @unique
+  createdAt     DateTime  @default(now())
+  
+  // Relations
+  posts         PostTag[]
+  
+  @@map("tags")
+}
+
+model PostTag {
+  postId        String
+  tagId         String
+  
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag           Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Comment {
+  id            String    @id @default(cuid())
+  content       String    @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Foreign Keys
+  postId        String
+  authorId      String
+  parentId      String?
+  
+  // Relations
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent        Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
+  replies       Comment[] @relation("CommentToComment")
+  likes         Like[]
+  
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
+}
+
+model Like {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  
+  // Foreign Keys
+  userId        String
+  postId        String?
+  commentId     String?
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post          Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment       Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  
+  // Unique constraints
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@map("likes")
+}
+
+model Bookmark {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  
+  // Foreign Keys
+  userId        String
+  postId        String
+  
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId])
+  @@map("bookmarks")
 }
