@@ -1,10 +1,13 @@
+
+
 generator client {
   provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"  // or "sqlite" for local dev
-
+  provider = "postgresql"
+ 
 }
 
 model User {
@@ -13,7 +16,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // For email/password auth
+  password      String?
   bio           String?   @db.Text
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -49,7 +52,7 @@ model Post {
   likes         Like[]
   bookmarks     Bookmark[]
   
-  // Indexes for better query performance
+  // Indexes
   @@index([slug])
   @@index([authorId])
   @@index([publishedAt])
@@ -88,7 +91,7 @@ model Comment {
   // Foreign Keys
   postId        String
   authorId      String
-  parentId      String?   // For nested comments
+  parentId      String?
   
   // Relations
   post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -116,7 +119,7 @@ model Like {
   post          Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment       Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
   
-  // User can only like a post or comment once
+  // Unique constraints
   @@unique([userId, postId])
   @@unique([userId, commentId])
   @@map("likes")
@@ -134,7 +137,6 @@ model Bookmark {
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
   
-  // User can only bookmark a post once
   @@unique([userId, postId])
   @@map("bookmarks")
 }
