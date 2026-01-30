@@ -45,9 +45,11 @@ async function getPosts(page: number) {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: { page?: string }
+  searchParams: Promise<{ page?: string }> // <-- Change this line
 }) {
-  const currentPage = Number(searchParams.page) || 1
+  // Await the searchParams Promise
+  const { page } = await searchParams; // <-- Add this line
+  const currentPage = Number(page) || 1;
   const { posts, total, totalPages } = await getPosts(currentPage)
 
   return (
