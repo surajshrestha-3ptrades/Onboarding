@@ -42,9 +42,10 @@ async function getPost(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string }
+  params:Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const post = await getPost(params.slug)
+  const {slug} = await params;
+  const post = await getPost(slug)
 
   return {
     title: post.title,
@@ -60,9 +61,10 @@ export async function generateMetadata({
 export default async function PostPage({
   params,
 }: {
-  params: { slug: string }
+  params:Promise<{ slug: string }>
 }) {
-  const post = await getPost(params.slug)
+  const slug = await params;
+  const post = await getPost(slug.slug);
 
   return (
     <article className="container mx-auto px-4 py-8 max-w-4xl">
